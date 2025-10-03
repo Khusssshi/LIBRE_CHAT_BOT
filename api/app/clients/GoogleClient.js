@@ -40,6 +40,57 @@ const endpointPrefix =
 const settings = endpointSettings[EModelEndpoint.google];
 const EXCLUDED_GENAI_MODELS = /gemini-(?:1\.0|1-0|pro)/;
 
+const MODEL_ALIASES = new Map(
+  Object.entries({
+    'gemini-1.5-flash-001': 'gemini-1.5-flash',
+    'gemini-1.5-flash-002': 'gemini-1.5-flash-latest',
+    'gemini-1.5-pro-001': 'gemini-1.5-pro',
+    'gemini-1.5-pro-002': 'gemini-1.5-pro-latest',
+    'gemini-1.0-pro-001': 'gemini-1.0-pro',
+    'google/gemini-1.5-flash-001': 'gemini-1.5-flash',
+    'google/gemini-1.5-flash-002': 'gemini-1.5-flash-latest',
+    'google/gemini-1.5-pro-001': 'gemini-1.5-pro',
+    'google/gemini-1.5-pro-002': 'gemini-1.5-pro-latest',
+    'gemini-pro': 'gemini-1.0-pro',
+    'google/gemini-pro': 'gemini-1.0-pro',
+    'gemini-2.0-flash-001': 'gemini-2.0-flash',
+    'gemini-2.0-flash-exp': 'gemini-2.0-flash-exp',
+    'gemini-2.0-flash-lite-001': 'gemini-2.0-flash-lite',
+  }),
+);
+
+const MODELS_WITHOUT_THINKING = new Set([
+  'gemini-1.5-flash',
+  'gemini-1.5-flash-8b',
+  'gemini-1.5-flash-latest',
+  'gemini-2.5-flash',
+  'gemini-2.5-flash-lite',
+  'gemini-2.0-flash',
+  'gemini-2.0-flash-exp',
+  'gemini-2.0-flash-lite',
+  'gemini-2.0-flash-lite-001',
+  'gemini-2.0-flash-001',
+  'gemini-flash-latest',
+  'gemini-flash-lite-latest',
+]);
+
+const normalizeModelName = (model) => {
+  if (!model) {
+    return model;
+  }
+
+  const trimmedModel = model.trim();
+  if (MODEL_ALIASES.has(trimmedModel)) {
+    return MODEL_ALIASES.get(trimmedModel);
+  }
+
+  if (trimmedModel.startsWith('google/')) {
+    return trimmedModel.replace(/^google\//, '');
+  }
+
+  return trimmedModel;
+};
+
 class GoogleClient extends BaseClient {
   constructor(credentials, options = {}) {
     super('apiKey', options);
@@ -137,6 +188,16 @@ class GoogleClient extends BaseClient {
     }
 
     this.modelOptions = this.options.modelOptions || {};
+    this.modelOptions.model = normalizeModelName(this.modelOptions.model);
+
+    if (MODELS_WITHOUT_THINKING.has(this.modelOptions.model)) {
+      this.modelOptions.thinking = false;
+      this.modelOptions.thinkingBudget = 0;
+    }
+
+    if (typeof this.options.modelLabel === 'string') {
+      this.options.modelLabel = normalizeModelName(this.options.modelLabel);
+    }
 
     this.options.attachments?.then((attachments) => this.checkVisionRequest(attachments));
 
