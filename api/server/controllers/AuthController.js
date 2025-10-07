@@ -1,6 +1,6 @@
 const cookies = require('cookie');
 const jwt = require('jsonwebtoken');
-const openIdClient = require('openid-client');
+// const openIdClient = require('openid-client');
 const { isEnabled } = require('@librechat/api');
 const { logger } = require('@librechat/data-schemas');
 const {

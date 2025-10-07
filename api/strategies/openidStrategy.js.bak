@@ -1,7 +1,7 @@
 const undici = require('undici');
 const fetch = require('node-fetch');
 const passport = require('passport');
-const client = require('openid-client');
+const client = await import('openid-client');
 const jwtDecode = require('jsonwebtoken/decode');
 const { CacheKeys } = require('librechat-data-provider');
 const { HttpsProxyAgent } = require('https-proxy-agent');

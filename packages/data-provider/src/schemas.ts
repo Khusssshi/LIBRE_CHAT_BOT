@@ -265,7 +265,7 @@ export const googleSettings = {
     default: 40 as const,
   },
   thinking: {
-    default: true as const,
+    default: false as const,
   },
   thinkingBudget: {
     min: -1 as const,
